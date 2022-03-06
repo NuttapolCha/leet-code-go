@@ -5,9 +5,12 @@ import (
 )
 
 func main() {
-	nums := []int{8, 3, 7, 4, 1, 8, 10, 2, 10, 10}
-	// nums := []int{1, 2, 2, 3, 4, 4, 4, 5}
-	// nums := []int{2, 2, 3, 3, 3, 4}
+	// nums := []int{8, 3, 7, 4, 1, 8, 10, 2, 10, 10}
+	nums := []int{6, 5, 10, 2, 8, 6, 6, 5, 2, 9, 9, 4, 6, 3, 3, 7, 7, 8, 9, 5}
+	numCount, scoreMap := newCountMap(nums)
+	fmt.Printf("numCount: %+v\nscoreMap: %+v\n\n", numCount, scoreMap)
+
+	// checkPickOne(nums)
 
 	maximumPoints := deleteAndEarn(nums)
 	fmt.Printf("maximum earns = %d\n", maximumPoints)
@@ -18,7 +21,7 @@ func deleteAndEarn(nums []int) (cumulativePoints int) {
 		return 0
 	}
 	choosen := pickOne(nums)
-	// fmt.Printf(">> start deleteAndEarn, deleting %d from %v\n", choosen, nums)
+	fmt.Printf(">> start deleteAndEarn, deleting %d from %v\n", choosen, nums)
 
 	// we delete choosen, we earn choosen
 	numsAfterOperation := performOperation(nums, choosen)
@@ -32,29 +35,53 @@ func performOperation(nums []int, num int) (numsAfterOperation []int) {
 	left := num - 1
 	right := num + 1
 
-	nums, _ = deleteNumFromList(nums, num, false)
-	nums, _ = deleteNumFromList(nums, left, true)
-	nums, _ = deleteNumFromList(nums, right, true)
+	nums = deleteNumFromList(nums, num, false)
+	nums = deleteNumFromList(nums, left, true)
+	nums = deleteNumFromList(nums, right, true)
 
 	numsAfterOperation = nums
 	return
+}
+
+func checkPickOne(nums []int) {
+	_, scoreMap := newCountMap(nums)
+	for num := range scoreMap {
+		fmt.Printf("choosing %d will earns %d and lost %d\n", num, scoreMap[num], scoreMap[num-1]+scoreMap[num+1])
+	}
+	fmt.Printf("\n")
 }
 
 func pickOne(nums []int) (choosen int) {
 	// initial choosen
 	choosen = nums[0]
 
-	numCount, scoreMap := newCountMap(nums)
+	_, scoreMap := newCountMap(nums)
 
-	for num := range numCount {
+	maxParticipateScore := 0
+	maximumEarn := 0
+	minimumLost := scoreMap.sumValue()
 
-		left := num - 1
-		right := num + 1
-
-		lost := left*numCount[left] + right*numCount[right]
+	for num := range scoreMap {
+		participateScore := 0
 		earn := scoreMap[num]
+		lost := scoreMap[num-1] + scoreMap[num+1]
 
-		if lost < earn {
+		if earn > maximumEarn {
+			maximumEarn = earn
+			participateScore++
+		}
+
+		if lost < minimumLost {
+			minimumLost = lost
+			participateScore++
+		}
+
+		if isIsolate(num, scoreMap) {
+			participateScore += 10
+		}
+
+		if participateScore > maxParticipateScore {
+			maxParticipateScore = participateScore
 			choosen = num
 		}
 	}
@@ -62,11 +89,10 @@ func pickOne(nums []int) (choosen int) {
 	return
 }
 
-func deleteNumFromList(nums []int, num int, deleteAll bool) ([]int, int) {
+func deleteNumFromList(nums []int, num int, deleteAll bool) []int {
 	ret := make([]int, 0, len(nums))
 
 	numIsDeleted := false
-	sumOfDeletedNums := 0
 
 	for _, e := range nums {
 		if e != num || numIsDeleted {
@@ -75,11 +101,10 @@ func deleteNumFromList(nums []int, num int, deleteAll bool) ([]int, int) {
 			if !deleteAll {
 				numIsDeleted = true
 			}
-			sumOfDeletedNums += e
 		}
 	}
 
-	return ret, sumOfDeletedNums
+	return ret
 }
 
 type CountMap map[int]int
@@ -98,4 +123,21 @@ func newCountMap(nums []int) (CountMap, CountMap) {
 	}
 
 	return countMap, scoreMap
+}
+
+func (c CountMap) sumValue() int {
+	ret := 0
+	for _, value := range c {
+		ret += value
+	}
+	return ret
+}
+
+func isIsolate(num int, c CountMap) bool {
+	for key := range c {
+		if key == num+1 || key == num-1 {
+			return false
+		}
+	}
+	return true
 }

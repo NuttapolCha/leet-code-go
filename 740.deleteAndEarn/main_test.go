@@ -43,3 +43,55 @@ func TestNewCountMap(t *testing.T) {
 		})
 	}
 }
+
+func TestIsIsolate(t *testing.T) {
+	type testCase struct {
+		num      int
+		expected bool
+	}
+
+	countMap := map[int]int{
+		1: 1,
+		2: 3,
+		3: 4,
+		5: 1,
+		7: 1,
+		9: 1,
+	}
+
+	testCases := []testCase{
+		{
+			num:      1,
+			expected: false,
+		},
+		{
+			num:      2,
+			expected: false,
+		},
+		{
+			num:      3,
+			expected: false,
+		},
+		{
+			num:      5,
+			expected: true,
+		},
+		{
+			num:      7,
+			expected: true,
+		},
+		{
+			num:      9,
+			expected: true,
+		},
+	}
+
+	for i, tc := range testCases {
+		t.Run(fmt.Sprintf("test case %d", i+1), func(t *testing.T) {
+			actual := isIsolate(tc.num, countMap)
+			if actual != tc.expected {
+				t.Errorf("expected: %v but got: %v\n", tc.expected, actual)
+			}
+		})
+	}
+}
