@@ -5,7 +5,9 @@ import (
 )
 
 func main() {
-	nums := []int{8, 7, 3, 8, 1, 4, 10, 10, 10, 2}
+	nums := []int{8, 3, 7, 4, 1, 8, 10, 2, 10, 10}
+	// nums := []int{1, 2, 2, 3, 4, 4, 4, 5}
+	// nums := []int{2, 2, 3, 3, 3, 4}
 
 	maximumPoints := deleteAndEarn(nums)
 	fmt.Printf("maximum earns = %d\n", maximumPoints)
@@ -16,58 +18,45 @@ func deleteAndEarn(nums []int) (cumulativePoints int) {
 		return 0
 	}
 	choosen := pickOne(nums)
-	fmt.Printf(">> start deleteAndEarn, deleting %d from %v\n", choosen, nums)
+	// fmt.Printf(">> start deleteAndEarn, deleting %d from %v\n", choosen, nums)
 
-	numsAfterOperation, points := performOperation(nums, choosen)
-	cumulativePoints += points
+	// we delete choosen, we earn choosen
+	numsAfterOperation := performOperation(nums, choosen)
+	cumulativePoints += choosen
 
 	cumulativePoints += deleteAndEarn(numsAfterOperation)
 	return cumulativePoints
 }
 
-func performOperation(nums []int, num int) (resultNums []int, points int) {
+func performOperation(nums []int, num int) (numsAfterOperation []int) {
 	left := num - 1
 	right := num + 1
 
-	nums, points = deleteNumFromList(nums, num, false)
+	nums, _ = deleteNumFromList(nums, num, false)
 	nums, _ = deleteNumFromList(nums, left, true)
 	nums, _ = deleteNumFromList(nums, right, true)
 
-	resultNums = nums
+	numsAfterOperation = nums
 	return
 }
-
-// array related
 
 func pickOne(nums []int) (choosen int) {
 	// initial choosen
 	choosen = nums[0]
 
-	numCount, minimumLost := newCountMap(nums)
+	numCount, scoreMap := newCountMap(nums)
 
 	for num := range numCount {
-		fmt.Printf("\tchecking if it worth to choose: %d in nums: %v\n", num, nums)
-		// if we choose the current num, compare the points earned and lost
-		var earned, lost1, lost2 int
-		tmp := nums
 
-		// points earned if we choose to delete this num
-		tmp, earned = deleteNumFromList(tmp, num, false)
-		fmt.Printf("\twill earns: %d points if choose: %d\n", earned, num)
+		left := num - 1
+		right := num + 1
 
-		// points lost if we choose to delete this num
-		tmp, lost1 = deleteNumFromList(tmp, num-1, true)
-		_, lost2 = deleteNumFromList(tmp, num+1, true)
-		currentLost := lost1 + lost2
-		fmt.Printf("\twill lost: %d points if choose: %d\n", currentLost, num)
+		lost := left*numCount[left] + right*numCount[right]
+		earn := scoreMap[num]
 
-		// update minimumLost and choosen
-		if currentLost < minimumLost {
+		if lost < earn {
 			choosen = num
-			minimumLost = currentLost
-			fmt.Printf("\n\t>>> minimumLost was updated to %d, choosen was updated to %d\n", minimumLost, choosen)
 		}
-		fmt.Printf("\n\n")
 	}
 
 	return
@@ -93,19 +82,20 @@ func deleteNumFromList(nums []int, num int, deleteAll bool) ([]int, int) {
 	return ret, sumOfDeletedNums
 }
 
-// count map
-
 type CountMap map[int]int
 
-// newCountMap return a new CountMap and its sum
-func newCountMap(nums []int) (CountMap, int) {
-	ret := make(map[int]int, len(nums))
-	sum := 0
+// newCountMap return new occurances and scores maps
+func newCountMap(nums []int) (CountMap, CountMap) {
+	countMap := make(map[int]int, len(nums))
+	scoreMap := make(map[int]int, len(nums))
 
 	for _, num := range nums {
-		ret[num]++
-		sum += num
+		countMap[num]++
 	}
 
-	return ret, sum
+	for num, count := range countMap {
+		scoreMap[num] = num * count
+	}
+
+	return countMap, scoreMap
 }
