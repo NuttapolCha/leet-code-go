@@ -29,17 +29,18 @@ func scoreOfParentheses(s string) int {
 	scoreStack := &stack{}
 	score := 0
 
-	var prevIsOpen bool
+	// simple parentheses is () and its score = 1
+	var isSimpleParentheses bool
 	for _, char := range chars {
 		switch {
 		case isOpen(char):
 			scoreStack.push(score)
 			score = 0
-			prevIsOpen = true
+			isSimpleParentheses = true
 		case isClosed(char):
 			score = scoreStack.pop() + func() int {
-				if prevIsOpen {
-					prevIsOpen = false
+				if isSimpleParentheses {
+					isSimpleParentheses = false
 					return 1
 				}
 				return 2 * score
