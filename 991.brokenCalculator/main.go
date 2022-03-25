@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"time"
 )
 
 func main() {
@@ -12,31 +11,23 @@ func main() {
 func brokenCalc(startValue int, target int) int {
 	count := 0
 	for startValue != target {
-		fmt.Printf("iteration: %d, use multiply: %v\n", count+1, shouldUseMultiply(startValue, target))
-		if shouldUseMultiply(startValue, target) {
-			startValue *= 2
-		} else {
-			startValue--
-		}
-		fmt.Printf("current value = %d\n", startValue)
+		target = decision(startValue, target)
+		// fmt.Printf("count: %d, target = %d\n", count, target)
 		count++
-		time.Sleep(1 * time.Second)
+		// time.Sleep(1 * time.Second)
 	}
+
 	return count
 }
 
-func shouldUseMultiply(currValue, target int) bool {
-	// var countIfUseMultiply, countIfUseMinus int
-	if currValue*2 == target {
-		return true
+func decision(startValue, target int) int {
+	if target < startValue { // because divide cannot reach start value which is greater than target
+		return target + 1
 	}
-	if currValue*2 > target {
-		// countIfUseMultiply = currValue*2 - target
+	if target%2 == 0 {
+		return target / 2
 	}
-	if (currValue-1)*2 > target {
-		//
-	}
-	return false
+	return target + 1
 }
 
 // 1,000,000,000
