@@ -1,7 +1,7 @@
 # leet-code-go
 leet code practice using GOLANG
 
-# Result
+# Progress
 
 Use Helper means see other solution or looking at some hint
 
