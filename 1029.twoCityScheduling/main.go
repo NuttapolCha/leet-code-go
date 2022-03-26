@@ -9,64 +9,45 @@ func main() {
 	fmt.Println(twoCitySchedCost([][]int{
 		{259, 770},
 		{448, 54},
+		{840, 118},
 		{926, 667},
 		{184, 139},
-		{840, 118},
 		{557, 469},
 	},
 	))
 }
 
-type sortByA [][]int
+type flyingCost [][]int
 
-func (a sortByA) Len() int           { return len(a) }
-func (a sortByA) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a sortByA) Less(i, j int) bool { return a[i][0] < a[j][0] }
+func (f flyingCost) Len() int {
+	return len(f)
+}
 
-type sortByB [][]int
+func (f flyingCost) Swap(i, j int) {
+	f[i], f[j] = f[j], f[i]
+}
 
-func (a sortByB) Len() int           { return len(a) }
-func (a sortByB) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a sortByB) Less(i, j int) bool { return a[i][1] < a[j][1] }
+func (f flyingCost) Less(i, j int) bool {
+	return f[i][0]-f[i][1] < f[j][0]-f[j][1]
+}
+
+func (f flyingCost) costs() int {
+	sum := 0
+
+	for i, cost := range f {
+		if i < f.Len()/2 {
+			sum += cost[0]
+		} else {
+			sum += cost[1]
+		}
+	}
+
+	return sum
+}
 
 func twoCitySchedCost(costs [][]int) int {
-	sortedByA := sortByA(costs)
-	sort.Sort(sortedByA)
+	f := flyingCost(costs)
+	sort.Sort(f)
 
-	fmt.Printf("sorted by A: %+v\n", sortedByA)
-
-	people := len(costs)
-	cityCap := people / 2
-
-	aAmount := 0
-	for i, cost := range sortedByA {
-		// Since we already sorted costs,
-		// first half should go to city A, and the final half go to city B
-		if i < cityCap {
-			aAmount += cost[0]
-		} else {
-			aAmount += cost[1]
-		}
-	}
-
-	sortedByB := sortByB(costs)
-	sort.Sort(sortedByB)
-
-	fmt.Printf("sorted by B: %+v\n", sortedByB)
-
-	bAmount := 0
-	for i, cost := range sortedByB {
-		if i < cityCap {
-			bAmount += cost[1]
-		} else {
-			bAmount += cost[0]
-		}
-	}
-
-	return func() int {
-		if bAmount < aAmount {
-			return bAmount
-		}
-		return aAmount
-	}()
+	return f.costs()
 }
