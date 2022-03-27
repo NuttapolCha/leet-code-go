@@ -3,19 +3,10 @@ leet code practice using GOLANG
 
 # Progress
 
-Use Helper means see other solution or looking at some hint
+*Hint* indicates that whether I see hint or discussion or solution before submission or not?
 
-## Easy
-
-Summited: 6
-Use Helper: 0
-
-## Medium
-
-Sumitted: 3
-Use Helper: 2
-
-## Hard
-
-Summitted: 0
-Use Helper: 0
+| Difficulty  | Attempted | Accepted | Hint |
+|-------------|-----------|----------|------|
+| Easy        | 7         | 7        | 0    |
+| Medium      | 4         | 3        | 2    |
+| Hard        | 0         | 0        | 0    |
