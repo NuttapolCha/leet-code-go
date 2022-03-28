@@ -6,38 +6,12 @@ import (
 )
 
 func main() {
-	input := []int{-1, 0, 1, 2, -1, -4}
+	// input := []int{-1, 0, 1, 2, -1, -4}
+	// -4 -1 -1 0 1 2
+	input := func() []int {
+		return make([]int, 3000, 3000)
+	}()
 	fmt.Println(threeSum(input))
-}
-
-func threeSum(nums []int) [][]int {
-	ret := make([][]int, 0)
-
-	for i, num1 := range nums {
-		for j := i + 1; j < len(nums); j++ {
-			num2 := nums[j]
-			for k := j + 1; k < len(nums); k++ {
-				num3 := nums[k]
-				if num1+num2+num3 == 0 {
-					toAppend := []int{num1, num2, num3}
-					if !contains(ret, toAppend) {
-						ret = append(ret, toAppend)
-					}
-				}
-			}
-		}
-		// }
-	}
-	return ret
-}
-
-func contains(threeSums [][]int, s []int) bool {
-	for _, eachResult := range threeSums {
-		if isSame(eachResult, s) {
-			return true
-		}
-	}
-	return false
 }
 
 type intSorter []int
@@ -46,21 +20,43 @@ func (a intSorter) Len() int           { return len(a) }
 func (a intSorter) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a intSorter) Less(i, j int) bool { return a[i] < a[j] }
 
-func isSame(s1 []int, s2 []int) bool {
-	if len(s1) != len(s2) {
+func threeSum(nums []int) [][]int {
+	ret := make([][]int, 0)
+
+	sortedNums := intSorter(nums)
+	sort.Sort(sortedNums)
+
+	appended := make(map[string]bool)
+
+	var num2, num3 int
+	for i, num1 := range sortedNums {
+		for j := i + 1; j < len(sortedNums); j++ {
+			num2 = sortedNums[j]
+			for k := j + 1; k < len(sortedNums); k++ {
+				num3 = sortedNums[k]
+				if num1+num2+num3 == 0 {
+					if !alreadyExist(appended, num1, num2, num3) {
+						ret = append(ret, []int{num1, num2, num3})
+					}
+				}
+			}
+		}
+		fmt.Println("end of iteration")
+		fmt.Printf("len appended = %d, appended = %+v\n", len(appended), appended)
+		// time.Sleep(time.Second * 1)
+	}
+	return ret
+}
+
+func alreadyExist(appended map[string]bool, num1, num2, num3 int) bool {
+	if appended == nil {
 		return false
 	}
 
-	sorted1 := intSorter(s1)
-	sort.Sort(sorted1)
-
-	sorted2 := intSorter(s2)
-	sort.Sort(sorted2)
-
-	for i := 0; i < len(s1); i++ {
-		if sorted1[i] != sorted2[i] {
-			return false
-		}
+	key := fmt.Sprintf("%d:%d:%d", num1, num2, num3)
+	if !appended[key] {
+		appended[key] = true
+		return false
 	}
 
 	return true
