@@ -8,5 +8,5 @@ leet code practice using GOLANG
 | Difficulty  | Participated | Accepted | Hint |
 |-------------|-----------|----------|------|
 | Easy        | 7         | 7        | 0    |
-| Medium      | 5         | 4        | 3    |
+| Medium      | 6         | 5        | 3    |
 | Hard        | 0         | 0        | 0    |
