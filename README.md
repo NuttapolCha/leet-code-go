@@ -7,6 +7,6 @@ leet code practice using GOLANG
 
 | Difficulty  | Participated | Accepted | Hint |
 |-------------|-----------|----------|------|
-| Easy        | 6         | 6        | 0    |
+| Easy        | 7         | 7        | 1    |
 | Medium      | 8         | 7        | 3    |
 | Hard        | 0         | 0        | 0    |
