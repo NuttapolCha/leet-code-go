@@ -8,13 +8,24 @@ func main() {
 
 func maxArea(height []int) int {
 	var ret int
-	for i := 0; i < len(height); i++ {
-		for j := i + 1; j < len(height); j++ {
-			// guarantee that j always grater than i
-			area := (j - i) * min(height[i], height[j])
-			if area > ret {
-				ret = area
-			}
+	left := 0
+	right := len(height) - 1
+
+	for right > left {
+		// calculate area
+		area := (right - left) * min(height[left], height[right])
+		if area > ret {
+			ret = area
+		}
+
+		// decision should move left or right
+		switch {
+		case height[left] == max(height[left], height[right]):
+			// left is max, we greedy choose move right
+			right--
+		case height[right] == max(height[left], height[right]):
+			// right is max, we greedy chose move left
+			left++
 		}
 	}
 
@@ -23,6 +34,13 @@ func maxArea(height []int) int {
 
 func min(a, b int) int {
 	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
 		return a
 	}
 	return b
