@@ -115,11 +115,7 @@ func evalPostfix(postfix []string) int {
 	}
 
 	// fmt.Printf("postfix after eval: %s\n", postfix)
-	digits := ""
-	for _, digit := range postfix {
-		digits += digit
-	}
-	evaluated, err := strconv.Atoi(digits)
+	evaluated, err := strconv.Atoi(strings.Join(postfix, ""))
 	if err != nil {
 		panic(err)
 	}
@@ -128,20 +124,19 @@ func evalPostfix(postfix []string) int {
 
 func splitExpression(expression string) []string {
 	ret := make([]string, 0)
-	chars := strings.Split(expression, "")
 
 	operand := ""
-	for _, char := range chars {
-		if strings.TrimSpace(char) == "" {
+	for _, r := range expression {
+		if strings.TrimSpace(string(r)) == "" {
 			// ignore any spaces
 			continue
 		}
-		if isOperator(char) {
+		if isOperator(string(r)) {
 			ret = append(ret, operand)
-			ret = append(ret, char)
+			ret = append(ret, string(r))
 			operand = ""
 		} else {
-			operand += char
+			operand += string(r)
 		}
 	}
 
