@@ -7,7 +7,10 @@ import (
 )
 
 func main() {
-	fmt.Println(calculate("3+6 / 2*5"))
+	// fmt.Println(calculate("2-0+30-56+0"))
+	// fmt.Println(calculate("1*2-3/4+5*6-7*8+9/10"))
+	// fmt.Println(calculate("1+2*5+2/2"))
+	fmt.Println(calculate("1+2*5/3+6/4*2"))
 }
 
 type StringStack struct {
@@ -58,62 +61,96 @@ func calculate(infix string) int {
 	return evalPostfix(infixToPostfix(infix))
 }
 
-func infixToPostfix(infix string) (postfix string) {
-	chars := strings.Split(infix, "")
+func infixToPostfix(infix string) (postfix []string) {
+	chars := splitExpression(infix)
 	st := NewStringStack(len(chars))
 
 	for _, char := range chars {
 		switch {
-		case strings.TrimSpace(char) == "":
-			continue
 		case isOperator(char):
 			switch {
 			case st.isEmpty(), isHigherPriorityOperator(char, st.peek()):
 				st.push(char)
-			default:
-				postfix += st.pop()
+			case isEqualPriorityOperator(char, st.peek()):
+				for isEqualPriorityOperator(char, st.peek()) {
+					postfix = append(postfix, st.pop())
+				}
+				st.push(char)
+			default: // i.e. lower priority
+				for !st.isEmpty() {
+					postfix = append(postfix, st.pop())
+				}
 				st.push(char)
 			}
 		default:
-			postfix += char
+			postfix = append(postfix, char)
 		}
 	}
 
 	for !st.isEmpty() {
-		postfix += st.pop()
+		postfix = append(postfix, st.pop())
 	}
 
 	return
 }
 
-func evalPostfix(postfix string) int {
-	fmt.Printf("before eval postfix: %s\n", postfix)
-	chars := strings.Split(postfix, "")
-	var prev, prev2 string
-	var nextPostfix []string
+func evalPostfix(postfix []string) int {
+	// fmt.Printf("postfix before eval: %s\n", postfix)
 
-	for i, char := range chars {
+	var prev, prev2 string
+	for i, char := range postfix {
 		if isOperator(char) {
-			fmt.Printf("\t[iteration: %d is operator: %s]\n", i, char)
 			a, err := strconv.Atoi(prev2)
 			b, err := strconv.Atoi(prev)
 			if err != nil {
-				panic(fmt.Sprintf("invalid postfix: %s, curr = %s, prev = %s, prev2 = %s", postfix, char, prev, prev2))
+				panic(fmt.Sprintf("invalid postfix: %s char = %s, a = %s, b = %s, err: %v", postfix, char, prev2, prev, err))
 			}
 			result := operate(a, b, char)
-			nextPostfix = append(nextPostfix[0:i-2], result)
-			prev2 = string(nextPostfix[i-3])
-			prev = result
-		} else {
-			nextPostfix = append(nextPostfix, char)
-			prev2 = prev
-			prev = char
+			nextPostfix := append(postfix[0:i-2], result)
+			nextPostfix = append(nextPostfix, postfix[i+1:]...)
+			return evalPostfix(nextPostfix)
 		}
-		fmt.Printf("\tdone iteration: %d: nextPostfix = %s\n", i, nextPostfix)
+		prev2 = prev
+		prev = char
 	}
 
-	fmt.Printf("after eval postfix: %s\n", nextPostfix)
-	return 0
+	// fmt.Printf("postfix after eval: %s\n", postfix)
+	digits := ""
+	for _, digit := range postfix {
+		digits += digit
+	}
+	evaluated, err := strconv.Atoi(digits)
+	if err != nil {
+		panic(err)
+	}
+	return evaluated
+}
+
+func splitExpression(expression string) []string {
+	ret := make([]string, 0)
+	chars := strings.Split(expression, "")
+
+	operand := ""
+	for _, char := range chars {
+		if strings.TrimSpace(char) == "" {
+			// ignore any spaces
+			continue
+		}
+		if isOperator(char) {
+			ret = append(ret, operand)
+			ret = append(ret, char)
+			operand = ""
+		} else {
+			operand += char
+		}
+	}
+
+	if operand != "" {
+		ret = append(ret, operand)
+	}
+
+	// fmt.Printf("splitted expression: %s\n", ret)
+	return ret
 }
 
 var priority map[string]int = map[string]int{
@@ -131,8 +168,12 @@ func isHigherPriorityOperator(first, second string) bool {
 	return priority[first] > priority[second]
 }
 
+func isEqualPriorityOperator(first, second string) bool {
+	return priority[first] == priority[second]
+}
+
 func operate(a, b int, operator string) string {
-	fmt.Printf("operating: %d %s %d\n", a, operator, b)
+	// fmt.Printf("operating: %d %s %d\n", a, operator, b)
 	switch operator {
 	case "+":
 		return fmt.Sprintf("%d", a+b)
