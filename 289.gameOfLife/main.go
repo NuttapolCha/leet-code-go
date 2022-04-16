@@ -1,6 +1,8 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func main() {
 	input := [][]int{
@@ -10,16 +12,15 @@ func main() {
 		{0, 0, 0},
 	}
 	fmt.Printf("before:\n")
-	for _, row := range input {
-		for _, e := range row {
-			fmt.Printf("%d\t", e)
-		}
-		fmt.Println("")
-	}
+	printArray(input)
 
 	gameOfLife(input)
 
 	fmt.Printf("after:\n")
+	printArray(input)
+}
+
+func printArray(input [][]int) {
 	for _, row := range input {
 		for _, e := range row {
 			fmt.Printf("%d\t", e)
@@ -29,56 +30,81 @@ func main() {
 }
 
 func gameOfLife(board [][]int) {
-	numRows := len(board)
+	if len(board) == 0 {
+		return
+	}
+	if len(board[0]) == 0 {
+		return
+	}
 
-	copy := board
-	for i, row := range board {
-		numCols := len(row)
-		for j, _ := range row {
-			switch {
-			case i == 0: // first row
-				switch {
-				case j == 0:
-					if i+1 < numRows && j+1 < numCols {
-						board[i][j] = liveOrDie(copy[i+1][j], copy[i+1][j+1], copy[i][j+1])
-					} else if i+1 < numRows && j+1 >= numCols {
-						board[i][j] = liveOrDie(copy[i+1][j])
-					} else if i+1 >= numRows && j+1 < numCols {
-						board[i][j] = liveOrDie(copy[i][j+1])
-					}
-				case j == len(row)-1:
-				default:
-				}
-			case i == len(board)-1: // last row
-				switch {
-				case j == 0:
-				case j == len(row)-1:
-				default:
-				}
-			default: // not first and not last row
-				switch {
-				case j == 0:
-				case j == len(row)-1:
-				default:
-				}
-			}
+	var copied [][]int
+	for i := 0; i < len(board); i++ {
+		var row []int
+		for j := 0; j < len(board[i]); j++ {
+			row = append(row, board[i][j])
+		}
+		copied = append(copied, row)
+	}
+
+	for i := 0; i < len(board); i++ {
+		for j := 0; j < len(board[i]); j++ {
+			board[i][j] = liveOrDie(copied, i, j)
 		}
 	}
 }
 
 // O(1) (n max = 8)
-func liveOrDie(neighbors ...int) int {
+func liveOrDie(board [][]int, i, j int) int {
+	hasAbove := i > 0
+	hasBelow := i+1 < len(board)
+	hasLeft := j > 0
+	hasRight := j+1 < len(board[i])
+
 	sum := 0
-	for _, num := range neighbors {
-		sum += num
+
+	// above row
+	if hasAbove {
+		if hasLeft {
+			sum += board[i-1][j-1]
+		}
+
+		sum += board[i-1][j]
+
+		if hasRight {
+			sum += board[i-1][j+1]
+		}
 	}
 
+	// left and right
+	if hasLeft {
+		sum += board[i][j-1]
+	}
+	if hasRight {
+		sum += board[i][j+1]
+	}
+
+	// below row
+	if hasBelow {
+		if hasLeft {
+			sum += board[i+1][j-1]
+		}
+
+		sum += board[i+1][j]
+
+		if hasRight {
+			sum += board[i+1][j+1]
+		}
+	}
+
+	curr := board[i][j]
 	switch {
-	case sum < 2 || sum > 3:
+	case curr == 1 && (sum < 2 || sum > 3):
 		return 0
-	case sum == 2 || sum == 3:
+	case curr == 1 && sum == 2 || sum == 3:
+		return 1
+	case curr == 0 && sum == 3:
 		return 1
 	default:
-		panic("this should not be occurred")
+		return curr
 	}
 }
