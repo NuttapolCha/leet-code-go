@@ -60,6 +60,7 @@ func (q *minHeap) Peek() int {
 func (q *minHeap) DeQueue() int {
 	ret := q.Peek()
 	// q.a = q.a[1:]
+	// TODO: understanding why we must move the right most node to the root node
 	q.a[0] = q.a[len(q.a)-1]
 	q.a = q.a[0 : len(q.a)-1]
 	q.fixDown(0)
