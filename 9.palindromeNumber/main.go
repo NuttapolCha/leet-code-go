@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strings"
 )
 
 func main() {
@@ -11,13 +10,16 @@ func main() {
 
 func isPalindrome(x int) bool {
 	s := fmt.Sprintf("%d", x)
+	left := 0
+	right := len(s) - 1
 
-	chars := strings.Split(s, "")
-	backward := ""
-
-	for i := len(chars) - 1; i >= 0; i-- {
-		backward += chars[i]
+	for left < right {
+		if s[left] != s[right] {
+			return false
+		}
+		left++
+		right--
 	}
 
-	return backward == s
+	return true
 }
