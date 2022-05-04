@@ -3,9 +3,16 @@ package main
 import "fmt"
 
 func main() {
-	nums := []int{0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1}
-	// nums := []int{4, 2, 3}
-	fmt.Println(trap(nums))
+	testCases := [][]int{
+		{0, 7, 1, 4, 6},
+		{0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1},
+		{4, 2, 0, 3, 2, 5},
+		{4, 2, 3},
+	}
+
+	for _, height := range testCases {
+		fmt.Println(trap(height))
+	}
 }
 
 func trap(height []int) int {
@@ -24,19 +31,50 @@ func trap(height []int) int {
 		j := i + 1
 		unrealizedUnits := 0
 
+		nextMax := 0
+		nextMaxIndex := -1
+		nextMin := 0
+		nextMinIndex := -1
+
 		// moving j until next wall
 		for ; j < len(height) && height[j] < height[i]; j++ {
-			fmt.Printf("height[i=%d] = %d, height[j=%d] = %d\n", i, height[i], j, height[j])
+			// fmt.Printf("height[i=%d] = %d, height[j=%d] = %d\n", i, height[i], j, height[j])
+			// assign next max and next min
+			if height[j] > nextMax {
+				nextMax = height[j]
+				nextMaxIndex = j
+			}
+			if height[j] < nextMin {
+				nextMin = height[j]
+				nextMinIndex = j
+			}
+
 			unrealizedUnits += height[i] - height[j]
 		}
 
-		// no wall at another side
+		// no grater wall at another side
+		hasWallAtAnotherSide := false
 		if j >= len(height) {
-			i++
+			if nextMaxIndex > nextMinIndex {
+				hasWallAtAnotherSide = true
+				// recalculate unrealized units
+				j = i + 1
+				unrealizedUnits = 0
+
+				for ; j < nextMaxIndex; j++ {
+					unrealizedUnits += height[nextMaxIndex] - height[j]
+				}
+			}
 		} else {
-			fmt.Printf("units += %d\n", unrealizedUnits)
+			hasWallAtAnotherSide = true
+		}
+
+		if hasWallAtAnotherSide {
+			// fmt.Printf("units += %d\n", unrealizedUnits)
 			units += unrealizedUnits
 			i = j
+		} else {
+			i++
 		}
 	}
 	return units
