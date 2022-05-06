@@ -11,53 +11,65 @@ func main() {
 	fmt.Println(removeDuplicates(s, k))
 }
 
+type pair struct {
+	char  string
+	count int
+}
+
 type SpecialStack struct {
-	chars []string
+	pairs []pair
 }
 
 func newSpecialStack() SpecialStack {
 	return SpecialStack{
-		chars: make([]string, 0),
+		pairs: make([]pair, 0),
 	}
 }
 
 func (st *SpecialStack) Push(s string) {
-	st.chars = append(st.chars, s)
+	st.pairs = append(st.pairs, pair{
+		char: s,
+		count: func() int {
+			if st.IsEmpty() {
+				return 1
+			}
+			if st.Peek().char == s {
+				return 1 + st.Peek().count
+			}
+			return 1
+		}(),
+	})
 }
 
-func (st *SpecialStack) Peek() string {
-	return st.chars[len(st.chars)-1]
+func (st *SpecialStack) Peek() pair {
+	return st.pairs[len(st.pairs)-1]
 }
 
-func (st *SpecialStack) Pop(k int) string {
+func (st *SpecialStack) Pop(k int) pair {
 	ret := st.Peek()
-	st.chars = st.chars[:len(st.chars)-k]
+	st.pairs = st.pairs[:len(st.pairs)-k]
 	return ret
 }
 
 func (st *SpecialStack) BottomUp() string {
-	return strings.Join(st.chars, "")
+	ret := ""
+	for _, pair := range st.pairs {
+		ret += pair.char
+	}
+
+	return ret
 }
 
 func (st *SpecialStack) IsEmpty() bool {
-	return len(st.chars) == 0
+	return len(st.pairs) == 0
 }
 
 func (st *SpecialStack) IsKDups(k int) bool {
-	is := false
-
-	if k <= len(st.chars) {
-		prev := st.Peek()
-		for i := 2; i <= k; i++ { // skip 1 because we already check from Peek()
-			s := st.chars[len(st.chars)-i]
-			is = s == prev
-			if !is { // if false, break and return immediatly
-				return is
-			}
-		}
+	if st.IsEmpty() {
+		return false
 	}
 
-	return is
+	return st.Peek().count >= k
 }
 
 func removeDuplicates(s string, k int) string {
@@ -66,7 +78,7 @@ func removeDuplicates(s string, k int) string {
 	chars := strings.Split(s, "")
 	for _, char := range chars {
 		st.Push(char)
-
+		// fmt.Printf("pushed: %s, now st.pairs = %+v\n", char, st.pairs)
 		// remove dups until no dups
 		for st.IsKDups(k) {
 			st.Pop(k)
