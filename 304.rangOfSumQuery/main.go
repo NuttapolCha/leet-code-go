@@ -5,7 +5,7 @@ import "fmt"
 func main() {
 	m := [][]int{
 		{3, 0, 1, 4, 2},
-		{6, 5, 3, 2, 1},
+		{5, 6, 3, 2, 1},
 		{1, 2, 0, 1, 5},
 		{4, 1, 0, 1, 7},
 		{1, 0, 3, 0, 5},
@@ -18,24 +18,43 @@ func main() {
 }
 
 type NumMatrix struct {
-	martrix [][]int
+	preCalculate [][]int
 }
 
-// TODO: apply caching in constructor and we are able to
-// do O(1) query time complexity
+// use 1D caching
 func Constructor(matrix [][]int) NumMatrix {
+	dp := make([][]int, len(matrix), len(matrix))
+
+	// build an 1-D sum cache
+	for i := 0; i < len(matrix); i++ {
+		dp[i] = make([]int, len(matrix[i]), len(matrix[i]))
+		for j := 0; j < len(dp[i]); j++ {
+			if j-1 >= 0 { // has previous in a row
+				dp[i][j] = matrix[i][j] + dp[i][j-1]
+			} else { // not has prvious in a row
+				dp[i][j] = matrix[i][j]
+			}
+		}
+	}
+
+	// fmt.Println("DP = ")
+	for _, row := range dp {
+		fmt.Println(row)
+	}
+
 	return NumMatrix{
-		martrix: matrix,
+		preCalculate: dp,
 	}
 }
 
 func (matrix *NumMatrix) SumRegion(row1 int, col1 int, row2 int, col2 int) int {
-	m := matrix.martrix
-
 	sum := 0
+
 	for i := row1; i <= row2; i++ {
-		for j := col1; j <= col2; j++ {
-			sum += m[i][j]
+		if col1-1 >= 0 {
+			sum += matrix.preCalculate[i][col2] - matrix.preCalculate[i][col1-1]
+		} else {
+			sum += matrix.preCalculate[i][col2]
 		}
 	}
 
