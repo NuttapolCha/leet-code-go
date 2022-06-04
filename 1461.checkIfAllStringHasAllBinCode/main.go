@@ -2,39 +2,22 @@ package main
 
 import (
 	"fmt"
-	"strings"
 )
 
 func main() {
-	s := "11100100101010100000000000000000011001010110010101001100100110"
-	k := 16
+	s := "00110"
+	k := 2
 
 	fmt.Println(hasAllCodes(s, k))
 }
 
 func hasAllCodes(s string, k int) bool {
-	allBins := genAllBins(make([]string, 0), make([]byte, k, k), 0)
+	bins := make(map[string]bool)
 
-	for _, bin := range allBins {
-		if !strings.Contains(s, bin) {
-			fmt.Printf("biniary code: %s is of length %d and does not exist in %s\n", bin, k, s)
-			return false
-		}
+	for i := 0; i < len(s)-k+1; i++ {
+		bins[s[i:i+k]] = true
 	}
 
-	return true
-}
-
-func genAllBins(curr []string, digits []byte, index int) []string {
-	if index == len(digits) { // out of range. i.e. no more fill
-		curr = append(curr, string(digits))
-	} else {
-		digits[index] = byte('0')
-		curr = genAllBins(curr, digits, index+1)
-
-		digits[index] = byte('1')
-		curr = genAllBins(curr, digits, index+1)
-	}
-
-	return curr
+	// 1 << k is the same as 2^k
+	return len(bins) == 1<<k
 }
