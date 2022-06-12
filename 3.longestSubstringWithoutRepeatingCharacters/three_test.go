@@ -45,6 +45,10 @@ func TestLengthOfLongestSubstring(t *testing.T) {
 			input:    "eabced",
 			expected: 5,
 		},
+		{
+			input:    "eacbedbt",
+			expected: 5,
+		},
 	}
 
 	for _, tc := range testCases {
