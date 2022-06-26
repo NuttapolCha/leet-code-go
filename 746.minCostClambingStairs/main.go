@@ -8,22 +8,23 @@ func main() {
 }
 
 func minCostClimbingStairs(cost []int) int {
-	dp := make([]int, len(cost))
-
-	dp[len(cost)-1] = cost[len(cost)-1]
-	dp[len(cost)-2] = cost[len(cost)-2]
+	dp0 := cost[len(cost)-1]
+	dp1 := cost[len(cost)-2]
 
 	if len(cost) <= 2 {
-		return min(dp[0], dp[1])
+		return min(dp0, dp1)
 	}
 
 	// bottom up DP but the bottom is the last index
+	var next int
 	for i := len(cost) - 3; i >= 0; i-- {
-		dp[i] = cost[i] + min(dp[i+1], dp[i+2])
+		next = cost[i] + min(dp0, dp1)
+		dp0 = dp1
+		dp1 = next
 	}
 
 	// fmt.Println(dp)
-	return min(dp[0], dp[1])
+	return min(next, dp0)
 }
 
 func min(a, b int) int {
