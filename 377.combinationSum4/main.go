@@ -9,16 +9,21 @@ func main() {
 }
 
 func combinationSum4(nums []int, target int) int {
-	if target == 0 {
-		return 1
-	}
-	if target < 0 {
-		return 0
+	// bottom up DP
+	dp := make([]int, target+1)
+
+	// smallest problem => dp[0] = 0
+
+	for i := 1; i <= target; i++ {
+		for _, num := range nums {
+			if i-num == 0 {
+				dp[i] += 1
+			} else if i-num > 0 {
+				dp[i] += dp[i-num]
+			}
+		}
 	}
 
-	combs := 0
-	for _, num := range nums {
-		combs += combinationSum4(nums, target-num)
-	}
-	return combs
+	// fmt.Println(dp)
+	return dp[target]
 }
